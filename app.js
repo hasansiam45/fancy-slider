@@ -24,18 +24,29 @@ const showImages = (images) => {
     let div = document.createElement('div');
     div.className = 'col-lg-3 col-md-4 col-xs-6 img-item mb-2';
     div.innerHTML = ` <img class="img-fluid img-thumbnail" onclick=selectItem(event,"${image.webformatURL}") src="${image.webformatURL}" alt="${image.tags}">`;
-    gallery.appendChild(div)
+
+    gallery.appendChild(div);
+
   })
+  spinners();
 
 }
 
 const getImages = (query) => {
+  spinners();
   fetch(`https://pixabay.com/api/?key=${KEY}=${query}&image_type=photo&pretty=true`)
     .then(response => response.json())
     .then(data => {
-      showImages(data.hits)
+      if (data.hits.length == 0) {
+        alert('Sorry! No match found.');
+        spinners();
+
+      } else {
+        showImages(data.hits)
+      }
+
     })
-    
+
     .catch(err => console.log(err))
 }
 
@@ -43,14 +54,13 @@ let slideIndex = 0;
 const selectItem = (event, img) => {
   let element = event.target;
   element.classList.add('added');
- 
+
   let item = sliders.indexOf(img);
   if (item === -1) {
     sliders.push(img);
   } else {
-    // alert('Hey, Already added !')
     sliders.pop(img);
-  element.classList.remove('added');
+    element.classList.remove('added');
 
   }
 }
@@ -74,19 +84,29 @@ const createSlider = () => {
   document.querySelector('.main').style.display = 'block';
   // hide image aria
   imagesArea.style.display = 'none';
-  const duration = document.getElementById('duration').value || 1000;
+  let duration = Math.abs(document.getElementById('duration').value) || 1000;
+
   if (duration >= 1000) {
-      sliders.forEach(slide => {
-    let item = document.createElement('div')
-    item.className = "slider-item";
-    item.innerHTML = `<img class="w-100"
+
+    makeSlide();
+
+  } else {
+    duration += 1000;
+    makeSlide();
+  }
+
+
+  function makeSlide() {
+    sliders.forEach(slide => {
+      let item = document.createElement('div')
+      item.className = "slider-item";
+      item.innerHTML = `<img class="w-100"
     src="${slide}"
     alt="">`;
-    sliderContainer.appendChild(item)
-  })
-  } else {
-    alert('Duration must be at least 1000 millisecond')
+      sliderContainer.appendChild(item)
+    })
   }
+
 
   changeSlide(0)
   timer = setInterval(function () {
@@ -117,7 +137,7 @@ const changeSlide = (index) => {
   items.forEach(item => {
     item.style.display = "none"
   })
-
+  
   items[index].style.display = "block"
 }
 
@@ -130,13 +150,18 @@ searchBox.addEventListener('keypress', function (event) {
 })
 
 function searchResult() {
-    document.querySelector('.main').style.display = 'none';
-    clearInterval(timer);
-    const search = document.getElementById('search');
-    getImages(search.value)
-    sliders.length = 0;
+  document.querySelector('.main').style.display = 'none';
+  clearInterval(timer);
+  const search = document.getElementById('search');
+  getImages(search.value)
+  sliders.length = 0;
 }
 
 sliderBtn.addEventListener('click', function () {
   createSlider()
 })
+
+const spinners = () => {
+  const spinner = document.getElementById('spinner');
+  spinner.classList.toggle('d-none');
+}
