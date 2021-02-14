@@ -59,7 +59,7 @@ const selectItem = (event, img) => {
   if (item === -1) {
     sliders.push(img);
   } else {
-    sliders.pop(img);
+    sliders.splice(item, 1);
     element.classList.remove('added');
 
   }
@@ -90,7 +90,8 @@ const createSlider = () => {
 
     makeSlide();
 
-  } else {
+  } 
+  if(duration<1000 && duration>=0) {
     duration += 1000;
     makeSlide();
   }
